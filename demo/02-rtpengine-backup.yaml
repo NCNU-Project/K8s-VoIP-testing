@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtpengine-bak-deployment
+  labels:
+    app.kubernetes.io/name: rtpengine-bak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rtpengine-bak
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rtpengine-bak
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.0.4
+        ports:
+        - containerPort: 6379
+---
+
