@@ -2,319 +2,92 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rtpengine-163_22_22_68-20000
+  name: rtpengine-10.22.149.230-p0
   annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
+    metallb.universe.tf/allow-shared-ip: "key-to-share-10.22.149.230"
 spec:
   type: LoadBalancer
   selector:
-    ip: 163_22_22_68
+    ip: 10.22.149.230
+    partition-leader-0: "True"
   ports:
-    - name: RTP
+    - name: rtp-20000
       protocol: UDP
       port: 20000
       targetPort: 20000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20001
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20001
       protocol: UDP
       port: 20001
       targetPort: 20001
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20002
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20002
       protocol: UDP
       port: 20002
       targetPort: 20002
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20003
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20003
       protocol: UDP
       port: 20003
       targetPort: 20003
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20004
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20004
       protocol: UDP
       port: 20004
       targetPort: 20004
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20005
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20005
       protocol: UDP
       port: 20005
       targetPort: 20005
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20006
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20006
       protocol: UDP
       port: 20006
       targetPort: 20006
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20007
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20007
       protocol: UDP
       port: 20007
       targetPort: 20007
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20008
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20008
       protocol: UDP
       port: 20008
       targetPort: 20008
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20009
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20009
       protocol: UDP
       port: 20009
       targetPort: 20009
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20010
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20010
       protocol: UDP
       port: 20010
       targetPort: 20010
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20011
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20011
       protocol: UDP
       port: 20011
       targetPort: 20011
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20012
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20012
       protocol: UDP
       port: 20012
       targetPort: 20012
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20013
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20013
       protocol: UDP
       port: 20013
       targetPort: 20013
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20014
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20014
       protocol: UDP
       port: 20014
       targetPort: 20014
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20015
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20015
       protocol: UDP
       port: 20015
       targetPort: 20015
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20016
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20016
       protocol: UDP
       port: 20016
       targetPort: 20016
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20017
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20017
       protocol: UDP
       port: 20017
       targetPort: 20017
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20018
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20018
       protocol: UDP
       port: 20018
       targetPort: 20018
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rtpengine-163_22_22_68-20019
-  annotations:
-    metallb.universe.tf/allow-shared-ip: "key-to-share-163.22.22.68"
-spec:
-  type: LoadBalancer
-  selector:
-    ip: 163_22_22_68
-  ports:
-    - name: RTP
+    - name: rtp-20019
       protocol: UDP
       port: 20019
       targetPort: 20019

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: cool-app
+  name: cool-app
+  namespace: default
+spec:
+  replicas: 3
+  serviceName: "cool-app"
+  selector:
+    matchLabels:
+      app: cool-app
+  template:
+    metadata:
+      labels:
+        app: cool-app
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                  - cool-app
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: cool-app
+          image: nginx

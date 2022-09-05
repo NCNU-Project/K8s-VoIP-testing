@@ -14,10 +14,27 @@ spec:
       labels:
         app.kubernetes.io/name: rtpengine-bak
     spec:
+      serviceAccountName: "rtpengine-watcher-pods"
       containers:
-      - name: redis
-        image: redis:7.0.4
+      - name: rtpengine
+        image: efficacy38/rtpengine:v2.3
         ports:
-        - containerPort: 6379
----
-
+        - containerPort: 2223
+        env:
+        - name: PUBLIC_IPV4
+          value: "163.22.22.67"
+        # command: ["sleep", "infinity"]
+      - name: leader-speacker
+        image: efficacy38/lb-watcher:v0
+        env:
+        - name: namespace
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: name_prefix
+          value: "rtpengine-10.22.149.230-p"
+        - name: range_min
+          value: "0"
+        - name: range_max
+          value: "1"
+        # command: ["sleep", "infinity"]

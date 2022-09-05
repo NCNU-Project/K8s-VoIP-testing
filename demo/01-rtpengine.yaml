@@ -1,24 +1,127 @@
-apiVersion: apps/v1
-kind: DaemonSet
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  name: rtpengine-daemonSet
+  name: rtpengine-watcher-pods
+---
+# which generate it with following cmd
+# k create role rtpengine-monitor-viewer --verb=get --verb=watch \
+#   --resource=service --resource-name=kamailio --dry-run=client -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rtpengine-monitor-viewer
+  namespace: default
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - get
+  - watch
+  - list
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - get
+  - watch
+  - list
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+    # resourceNames:
+    # - rtpengine-controller
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+--- 
+
+# create this role binding with following cmd
+# k create rolebinding kamailio-service-rolebinding --role=rtpengine-monitor-viewer \
+#   --serviceaccount=default:kamailio-pods  --dry-run=client -o yaml -n default
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kamailio-service-rolebinding
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rtpengine-monitor-viewer
+subjects:
+- kind: ServiceAccount
+  name: rtpengine-watcher-pods
+  namespace: default
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rtpengine-daemonset
   labels:
     app.kubernetes.io/name: rtpengine
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: rtpengine
+  serviceName: "rtpengine"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: rtpengine
+        ip: 10.22.149.230
+        rtpengine-10.22.149.230-p0: "False"
     spec:
+      serviceAccountName: "rtpengine-watcher-pods"
+      nodeSelector:
+        fast-network: "True"
+      initContainers:
+      - name: fetch-ordinal
+        image: busybox:stable
+        volumeMounts:
+          - mountPath: /data/rtpengine/conf_env
+            name: tmp-env
+        command:
+        - "/bin/bash"
+        - "-c"
+        - |
+          # get the hostname ordinal
+          [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          cat << EOF > /data/rtpengine/conf_env
+          range_min=ordinal
+          range_max=$((ordinal + 1))
+          EOF
       containers:
-      - name: ng-control
-        image: PCH-rtpengine:v5.1
+      - name: rtpengine
+        image: efficacy38/rtpengine:v2.3
         ports:
         - containerPort: 2223
+        env:
+        - name: PUBLIC_IPV4
+          value: "163.22.22.67"
+        # command: ["sleep", "infinity"]
+      - name: leader-speacker
+        image: efficacy38/lb-watcher:v0
+        env:
+        - name: namespace
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: name_prefix
+          value: "rtpengine-10.22.149.230-p"
+        # command: ["sleep", "infinity"]
+      volumes:
+      - name: tmp-env
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -28,6 +131,3 @@ spec:
   selector:
     app.kubernetes.io/name: rtpengine
   clusterIP: None
----
-
-

@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kamailio-pods
+---
+# which generate it with following cmd
+# k create role kamailio-service-viewer --verb=get --verb=watch \
+#   --resource=service --resource-name=kamailio --dry-run=client -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kamailio-service-viewer
+  namespace: default
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - watch
+--- 
+
+# create this role binding with following cmd
+# k create rolebinding kamailio-service-rolebinding --role=kamailio-service-viewer \
+#   --serviceaccount=default:kamailio-pods  --dry-run=client -o yaml -n default
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kamailio-service-rolebinding
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kamailio-service-viewer
+subjects:
+- kind: ServiceAccount
+  name: kamailio-pods
+  namespace: default
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kamailio
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "key-to-share-10.22.149.230"
+  labels:
+    app: kamailio
+spec:
+  type: LoadBalancer
+  selector:
+    app: kamailio
+  ports:
+    - name: sip
+      protocol: UDP
+      port: 5060
+      targetPort: 5060
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kamailio-headless
+  labels:
+    app: kamailio
+spec:
+  selector:
+    app: kamailio
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kamailio-stateful
+  labels:
+    app: kamailio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kamailio
+  serviceName: "kamailio"
+  podManagementPolicy: "Parallel"
+  template:
+    metadata:
+      labels:
+        app: kamailio
+    spec:
+      serviceAccountName: kamailio-pods
+      volumes:
+        - name: kamailio-config
+          configMap:
+            name: kamailio-config
+      containers:
+      - name: kamailio
+        # image: efficacy38/kamailio:v1.13
+        image: efficacy38/kamailio:v1.16
+        imagePullPolicy: Always
+        command: ["sleep", "infinity"]
+        ports:
+        - containerPort: 5060
+        volumeMounts:
+          - name: kamailio-config
+            mountPath: /etc/kamailio
