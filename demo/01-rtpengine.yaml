@@ -51,7 +51,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: kamailio-service-rolebinding
+  name: rtpengine-service-rolebinding
   namespace: default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -73,6 +73,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: rtpengine
   serviceName: "rtpengine"
+  podManagementPolicy: "Parallel"
+  replicas: 3
   template:
     metadata:
       labels:
@@ -81,13 +83,23 @@ spec:
         rtpengine-10.22.149.230-p0: "False"
     spec:
       serviceAccountName: "rtpengine-watcher-pods"
-      nodeSelector:
-        fast-network: "True"
+      # nodeSelector:
+      #   fast-network: "True"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                  - cool-app
+            topologyKey: "kubernetes.io/hostname"
       initContainers:
       - name: fetch-ordinal
-        image: busybox:stable
+        image: ubuntu:focal
         volumeMounts:
-          - mountPath: /data/rtpengine/conf_env
+          - mountPath: /data/rtpengine/
             name: tmp-env
         command:
         - "/bin/bash"
@@ -96,21 +108,24 @@ spec:
           # get the hostname ordinal
           [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
           ordinal=${BASH_REMATCH[1]}
-          cat << EOF > /data/rtpengine/conf_env
-          range_min=ordinal
-          range_max=$((ordinal + 1))
+          cat << EOF > /data/rtpengine/conf_env.env
+          export range_min=$ordinal
+          export range_max=$((ordinal + 1))
           EOF
       containers:
       - name: rtpengine
-        image: efficacy38/rtpengine:v2.3
+        image: efficacy38/rtpengine:v0.1.0
         ports:
         - containerPort: 2223
         env:
         - name: PUBLIC_IPV4
           value: "163.22.22.67"
-        # command: ["sleep", "infinity"]
+        command: ["sleep", "infinity"]
       - name: leader-speacker
-        image: efficacy38/lb-watcher:v0
+        image: efficacy38/lb-watcher:v0.5
+        volumeMounts:
+          - mountPath: /data/rtpengine/
+            name: tmp-env
         env:
         - name: namespace
           valueFrom:
@@ -118,7 +133,7 @@ spec:
               fieldPath: metadata.namespace
         - name: name_prefix
           value: "rtpengine-10.22.149.230-p"
-        # command: ["sleep", "infinity"]
+        command: ["sleep", "infinity"]
       volumes:
       - name: tmp-env
         emptyDir: {}

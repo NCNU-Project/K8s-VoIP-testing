@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rtpengine-10.22.149.230-p0
+  name: rtpengine-1022149230-p0
   annotations:
     metallb.universe.tf/allow-shared-ip: "key-to-share-10.22.149.230"
 spec:
   type: LoadBalancer
   selector:
     ip: 10.22.149.230
-    partition-leader-0: "True"
+    rtpengine-10.22.149.230-p0: "True"
   ports:
     - name: rtp-20000
       protocol: UDP

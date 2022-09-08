@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/bin/python3
 from kubernetes import client, config
 from kubernetes.leaderelection import leaderelection
 from kubernetes.leaderelection.resourcelock.configmaplock import ConfigMapLock
@@ -17,26 +17,26 @@ import os
 logging.basicConfig(level=logging.INFO)
 
 # Authenticate using config file
-config.load_kube_config(config_file=r"~/.kube/config")
-# config.load_incluster_config()
+# config.load_kube_config(config_file=r"~/.kube/config")
+config.load_incluster_config()
 
 # leader election setting
-# leaderElectionConfig = {
-#     # A unique identifier for this candidate
-#     "candidate_id": socket.gethostname(),
-#     # Name of the lock object to be created
-#     "lock_namespace": os.environ["namespace"],           # Kubernetes namespace
-#     "lock_name_prefix": os.environ["name_prefix"],
-#     "lock_range_min": int(os.environ["range_min"]),
-#     "lock_range_max": int(os.environ["range_max"])
-# }
+leaderElectionConfig = {
+    # A unique identifier for this candidate
+    "candidate_id": socket.gethostname(),
+    # Name of the lock object to be created
+    "lock_namespace": os.environ["namespace"],           # Kubernetes namespace
+    "lock_name_prefix": os.environ["name_prefix"],
+    "lock_range_min": int(os.environ["range_min"]),
+    "lock_range_max": int(os.environ["range_max"])
+}
 
-leaderElectionConfig = {}
-leaderElectionConfig["candidate_id"] = "rtpengine-daemonset-tcqgq"
-leaderElectionConfig["lock_namespace"] = "default"
-leaderElectionConfig["lock_name_prefix"] = "test"
-leaderElectionConfig["lock_range_min"] = int("0")
-leaderElectionConfig["lock_range_max"] = int("4")
+# leaderElectionConfig = {}
+# leaderElectionConfig["candidate_id"] = "rtpengine-daemonset-tcqgq"
+# leaderElectionConfig["lock_namespace"] = "default"
+# leaderElectionConfig["lock_name_prefix"] = "test"
+# leaderElectionConfig["lock_range_min"] = int("0")
+# leaderElectionConfig["lock_range_max"] = int("4")
 
 def onstarted_leading(lock_name=""):
     body = {
