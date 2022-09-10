@@ -1,0 +1,6 @@
+[submodule "parse_folw/parse_flow"]
+	path = parse_folw/parse_flow
+	url = https://github.com/cssaheel/dissectors.git
+[submodule "parse_folw/dissectors"]
+	path = parse_folw/dissectors
+	url = https://github.com/cssaheel/dissectors.git
