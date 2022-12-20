@@ -1,0 +1,56 @@
+{#- fetch variables from environment variable  -#}
+
+{%- if currentID is not defined -%}
+    {% set currentID = environ('currentID')|int %}
+{%- endif -%}
+
+{%- if replicas is not defined -%}
+    {% set replicas = environ('replicas')|int %}
+{%- endif -%}
+
+{%- if parationPortBase is not defined -%}
+    {% set parationPortBase = environ('parationPortBase')|int %}
+{%- endif -%}
+
+{%- if parationPortSize is not defined -%}
+    {% set parationPortSize = environ('parationPortSize')|int %}
+{%- endif -%}
+
+{%- if portMin is not defined -%}
+    {% set portMin = parationPortBase + parationPortSize * currentID %}
+{%- endif -%}
+
+{%- if portMax is not defined -%}
+    {% set portMax = parationPortBase + parationPortSize * (currentID + 1) %}
+{%- endif -%}
+
+{#- pre-defined macro -#}
+
+{%- macro genStatefulSetId(statefulSetName, currentID, serviceName) -%}
+{{ statefulSetName }}-{{ currentID }}.{{ serviceName }}
+{%- endmacro -%}
+
+{%- macro genInt(num, currentID, advertisedIP, serviceName) -%}
+pub{{ num }}/{{ genStatefulSetId(statefulSetName, currentID, serviceName) }}!{{advertisedIP}};
+{%- endmacro -%}
+
+{#- the template -#}
+
+[rtpengine]
+interface=
+{{- genInt(currentID, currentID, advertisedIP, serviceName) -}}
+    {%- for v in range(1, replicas + 1) -%}
+        {% if v != currentID %}
+            {{- genInt(v, currentID, advertisedIP, serviceName) -}}
+        {% endif %}
+{%- endfor %}
+redis=redis:6379/{{ currentID }}
+foreground=true
+log-stderr=true
+listen-ng=rtpengine-daemonset-{{ currentID }}.rtpengine:2223
+port-min={{ portMin }}
+port-max={{ portMax }}
+log-level=6
+delete-delay=0
+listen-http=8080
+listen-cli = localhost:2224

@@ -100,7 +100,7 @@ spec:
         image: ubuntu:focal
         volumeMounts:
           - mountPath: /data/rtpengine/
-            name: rtpengine-config
+            name: tmp-env
         command:
         - "/bin/bash"
         - "-c"
@@ -111,55 +111,38 @@ spec:
           cat << EOF > /data/rtpengine/conf_env.env
           export range_min=$ordinal
           export range_max=$((ordinal + 1))
-          export currentID=$ordinal
           EOF
-      - image: ghcr.io/dinuta/jinja2docker/jinja2docker:2.1.6
-        name: config-renderer
+      - name: generate-rtpengine-config
+        image: ghcr.io/dinuta/jinja2docker/jinja2docker:2.1.6
         volumeMounts:
-        - name: rtpengine-template
-          mountPath: /templates/rtpengine.conf.j2
-          subPath: rtpengine.conf.j2
-        - name: rtpengine-template
-          mountPath: /variables/variables.json
-          subPath: variables.json
-        - name: rtpengine-config
-          mountPath: /data/rtpengine
-        command: ["/bin/sh"]
-        args: ["-c", "source /data/rtpengine/conf_env.env && env && jinja2 /templates/rtpengine.conf.j2 /variables/variables.json --format=json > /data/rtpengine/rtpengine.conf"]
-        env:
-        - name: replicas
-          value: "3"
-        - name: parationPortBase
-          valueFrom:
-            configMapKeyRef:
-              key: parationPortBase
-              name: rtpengine-template
-        - name: parationPortSize
-          valueFrom:
-            configMapKeyRef:
-              key: parationPortSize
-              name: rtpengine-template
+          - mountPath: /data/rtpengine/
+            name: tmp-conf
+        command:
+        - "/bin/bash"
+        - "-c"
+        - |
+          # get the hostname ordinal
+          [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          cat << EOF > /data/rtpengine/conf_env.env
+          export range_min=$ordinal
+          export range_max=$((ordinal + 1))
+          EOF
       containers:
       - name: rtpengine
-        image: efficacy38/rtpengine:v2.4
+        image: efficacy38/rtpengine:v0.1.0
         ports:
         - containerPort: 2223
         env:
         - name: PUBLIC_IPV4
           value: "163.22.22.67"
-        volumeMounts:
-        - name: rtpengine-config
-          mountPath: /etc/rtpengine/rtpengine.conf
-          subPath: rtpengine.conf
-        command: ["/bin/bash", "-c", "sleep 5 && /entrypoint.sh rtpengine"]
-        # command: ["/bin/sleep", "infinity"]
-        # args: ["rtpengine"]
+        command: ["sleep", "infinity"]
       - name: leader-speacker
         image: efficacy38/lb-watcher:v0.6
         imagePullPolicy: Always
         volumeMounts:
-        - name: rtpengine-config
-          mountPath: /data/rtpengine/
+          - mountPath: /data/rtpengine/
+            name: tmp-env
         env:
         - name: namespace
           valueFrom:
@@ -167,17 +150,10 @@ spec:
               fieldPath: metadata.namespace
         - name: name_prefix
           value: "rtpengine-10.22.149.230-p"
+            # command: ["sleep", "infinity"]
       volumes:
-      - name: rtpengine-config
+      - name: tmp-env
         emptyDir: {}
-      - name: rtpengine-template
-        configMap:
-          name: rtpengine-template
-          items:
-          - key: rtpengine.conf.j2
-            path: rtpengine.conf.j2
-          - key: variable.json
-            path: variables.json
 ---
 apiVersion: v1
 kind: Service

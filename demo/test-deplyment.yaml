@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: tmp
+  name: tmp
+spec:
+  selector:
+    matchLabels:
+      app: tmp
+  serviceName: test
+  podManagementPolicy: "Parallel"
+  replicas: &numReplicas 3
+  template:
+    metadata:
+      labels:
+        app: tmp
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                  - tmp
+            topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - image: ubuntu:22.04
+        name: environ-genrator
+        volumeMounts:
+        - name: rtpengine-config
+          mountPath: /data/rtpengine
+        command:
+          - "/bin/bash"
+          - "-c"
+          - |
+            # get the hostname ordinal
+            [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+            ordinal=${BASH_REMATCH[1]}
+            cat << EOF > /data/rtpengine/template.env
+            export currentID=$(( ordinal + 1 ))
+            EOF
+      - image: ghcr.io/dinuta/jinja2docker/jinja2docker:2.1.6
+        name: config-renderer
+        volumeMounts:
+        - name: rtpengine-template
+          mountPath: /templates/rtpengine.conf.j2
+          subPath: rtpengine.conf.j2
+        - name: rtpengine-template
+          mountPath: /variables/variables.json
+          subPath: variables.json
+        - name: rtpengine-config
+          mountPath: /data/rtpengine
+        command: ["/bin/sh"]
+        args: ["-c", "env && source /data/rtpengine/template.env && jinja2 /templates/rtpengine.conf.j2 /variables/variables.json --format=json > /data/rtpengine/rtpengine.conf"]
+        env:
+        - name: replicas
+          value: "*numReplicas"
+        - name: parationPortBase
+          valueFrom:
+            configMapKeyRef:
+              key: parationPortBase
+              name: rtpengine-template
+        - name: parationPortSize
+          valueFrom:
+            configMapKeyRef:
+              key: parationPortSize
+              name: rtpengine-template
+      containers:
+      - image: ubuntu:20.04
+        name: 20-04-cfkbh
+        volumeMounts:
+        - name: rtpengine-config
+          mountPath: /data/rtpengine
+        command: ["sleep", "infinity"]
+      volumes:
+        - name: rtpengine-config
+          emptyDir: {}
+        - name: rtpengine-template
+          configMap:
+            name: rtpengine-template
+            items:
+            - key: rtpengine.conf.j2
+              path: rtpengine.conf.j2
+            - key: variable.json
+              path: variables.json

@@ -1,0 +1,7 @@
+{
+  "subscribeKeyspaceMin": 1,
+  "subscribeKeyspaceMax": 3,
+  "statefulSetName": "rtpengine-daemonset",
+  "serviceName": "rtpengine",
+  "advertisedIP": "10.22.149.230"
+}
